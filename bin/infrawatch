@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# InfraWatch: PostgreSQL backups, restore tests, and host health checks.
+set -euo pipefail
+umask 077
+export LC_ALL=C
+
+BASE=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+# shellcheck source=lib/common.sh
+source "$BASE/lib/common.sh"
+# shellcheck source=lib/pg.sh
+source "$BASE/lib/pg.sh"
+# shellcheck source=lib/prune.sh
+source "$BASE/lib/prune.sh"
+# shellcheck source=lib/backup.sh
+source "$BASE/lib/backup.sh"
+# shellcheck source=lib/restore.sh
+source "$BASE/lib/restore.sh"
+# shellcheck source=lib/checks.sh
+source "$BASE/lib/checks.sh"
+# shellcheck source=lib/health.sh
+source "$BASE/lib/health.sh"
+# shellcheck source=lib/report.sh
+source "$BASE/lib/report.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: infrawatch <command>
+
+Commands:
+  backup        pg_dump the configured database and prune old dumps
+  prune         apply retention to dumps already on disk
+  restore-test  restore the newest dump into the scratch database and compare counts
+  restore       restore a dump into a named database
+  health        check load, memory, disk, systemd units, and long queries
+  triage        collect a first-response report (read-only)
+  logs          show toolkit logs (journalctl -t infrawatch, else the file log)
+
+infrawatch <command> --help where a command has flags.
+EOF
+}
+
+if [[ $# -lt 1 ]]; then
+  usage >&2
+  exit 2
+fi
+
+cmd=$1
+shift
+
+case "$cmd" in
+  help | -h | --help)
+    usage
+    exit 0
+    ;;
+esac
+
+load_config
+
+case "$cmd" in
+  backup) run_backup "$@" ;;
+  prune) run_prune "$@" ;;
+  restore-test) run_restore_test "$@" ;;
+  restore) run_restore "$@" ;;
+  health) run_health "$@" ;;
+  triage) run_triage "$@" ;;
+  logs) run_logs "$@" ;;
+  *)
+    printf 'unknown command: %s\n' "$cmd" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
