@@ -1,0 +1,20 @@
+[Unit]
+Description=InfraWatch health checks
+Documentation=file:///opt/infrawatch/docs/runbooks/incident-triage.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+Environment=INFRAWATCH_CONFIG=/etc/infrawatch/infrawatch.conf
+Environment=INFRAWATCH_ROOT=/opt/infrawatch
+EnvironmentFile=-/etc/infrawatch/infrawatch.env
+ExecStart=/opt/infrawatch/bin/infrawatch health
+SyslogIdentifier=infrawatch
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

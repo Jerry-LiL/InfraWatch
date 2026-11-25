@@ -1,0 +1,14 @@
+# Rotate toolkit logs. install.sh copies this to /etc/logrotate.d/infrawatch.
+# copytruncate because the shell scripts keep files open only for each append,
+# and a renamed file would not be reopened until the next run anyway.
+/var/log/infrawatch/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    create 0640 postgres postgres
+    su postgres postgres
+}

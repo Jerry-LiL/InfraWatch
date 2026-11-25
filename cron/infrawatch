@@ -1,0 +1,12 @@
+# InfraWatch schedules. Install as /etc/cron.d/infrawatch.
+# Do not also enable the systemd timers. Pick one scheduler.
+# Output is appended to the log directory so a healthy run does not mail root.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=root
+INFRAWATCH_CONFIG=/etc/infrawatch/infrawatch.conf
+INFRAWATCH_ROOT=/opt/infrawatch
+
+15 2 * * * postgres /opt/infrawatch/bin/infrawatch backup >>/var/log/infrawatch/cron.log 2>&1
+30 3 * * * postgres /opt/infrawatch/bin/infrawatch restore-test >>/var/log/infrawatch/cron.log 2>&1
+*/5 * * * * postgres /opt/infrawatch/bin/infrawatch health >>/var/log/infrawatch/cron.log 2>&1

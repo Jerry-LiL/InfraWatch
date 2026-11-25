@@ -1,0 +1,23 @@
+[Unit]
+Description=InfraWatch PostgreSQL backup
+Documentation=file:///opt/infrawatch/docs/runbooks/restore.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+Environment=INFRAWATCH_CONFIG=/etc/infrawatch/infrawatch.conf
+Environment=INFRAWATCH_ROOT=/opt/infrawatch
+EnvironmentFile=-/etc/infrawatch/infrawatch.env
+ExecStart=/opt/infrawatch/bin/infrawatch backup
+SyslogIdentifier=infrawatch
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
